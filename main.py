@@ -1,2 +1,2 @@
-print(111)
-print(222)
+print(11)
+print(22)
