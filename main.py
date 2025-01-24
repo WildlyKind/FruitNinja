@@ -52,15 +52,29 @@ def start_screen():
 
 
 tile_width = tile_height = 50
-images = [load_image('apple1.png'), load_image('lemon1.png'), load_image('pear1.png'),
-          load_image('pineapple1.png'), load_image('watermelon1.png')]
+#images = [load_image('apple1.png'), load_image('lemon1.png'), load_image('pear1.png'),
+#          load_image('pineapple1.png'), load_image('watermelon1.png')]
 
+
+class HalfFruit(pygame.sprite.Sprite):
+    def __init__(self, fruit, side, pos_x, pos_y):
+        super().__init__(half_fruits, all_sprites)
+        self.side = side
+        self.image = load_image(fruit)
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+
+    def update(self, *args):
+        if self.side == 'left':
+            self.rect = self.rect.move(-5, 10)
+        else:
+            self.rect = self.rect.move(5, 10)
 
 
 class Fruits(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, fruit_type):
         super().__init__(fruits_group, all_sprites)
-        self.image = choice(images)
+        self.fruit_type = fruit_type
+        self.image = load_image(fruit_type + ".png")
         self.rect = self.image.get_rect()
         self.speed = random.randint(1, 5)
         w, h = self.rect.size
@@ -68,31 +82,42 @@ class Fruits(pygame.sprite.Sprite):
         self.rect = self.rect.move(random.randrange(0, WIDTH - w, 20), 0)
 
 
-    def update(self):
+    def update(self, *args):
         self.rect = self.rect.move(0, self.speed)
         if self.rect.y > HEIGHT:
             self.speed = random.randint(1, 6)
             self.rect.y = - self.rect.h
+        if args:
+            x, y = args[0]
+            if self.rect.collidepoint(x, y):
+                self.rect.y = -50
+                HalfFruit(self.fruit_type + "_left.png", 'left', x, y)
+                HalfFruit(self.fruit_type + "_right.png", 'right', x, y)
+                #self.image = load_image('apple2.png')
 
 
 fruits_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-horizontal_borders = pygame.sprite.Group()
-vertical_borders = pygame.sprite.Group()
+half_fruits = pygame.sprite.Group()
+
+d = ('lemon', 'apple', 'pear', 'pineapple', 'watermelon')
 
 for i in range(10):
-    Fruits()
+    fruit_type = random.choice(d)
+    Fruits(fruit_type)
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
-pygame.display.set_caption('')
+pygame.display.set_caption('FRUIT NINJA')
 start_screen()
-f = Fruits()
+#f = Fruits()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            all_sprites.update(event.pos)
     screen.fill(WHITE)
     all_sprites.draw(screen)
     all_sprites.update()
