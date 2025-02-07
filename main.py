@@ -62,8 +62,45 @@ def start_screen():
         pygame.display.flip()
         clock.tick(FPS)
 
-def count_result():
-    pass
+def finish_screen():
+    intro_text = [" Поздравляю!",
+                  "    Ты набрал", ""
+                  f"    {result} баллов"]
+
+    fon = pygame.transform.scale(load_image('fon6.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 70)
+    text_coord = 170
+    arr_rect = []
+    for line in intro_text:
+        string_rendered = font.render(line, 1, BLACK)
+        intro_rect = string_rendered.get_rect()
+        text_coord += 20
+        intro_rect.top = text_coord
+        intro_rect.x = 250
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        arr_rect.append(intro_rect)
+
+    arr_rect = arr_rect[1:]
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if arr_rect[0].collidepoint(event.pos):
+                    light()
+                elif arr_rect[1].collidepoint(event.pos):
+                    medium()
+                else:
+                    hard()
+
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
 
 tile_width = tile_height = 50
 
@@ -161,23 +198,34 @@ def hard():
 pygame.init()
 timer_interval = 1000 # 0.5 seconds
 timer_event = pygame.USEREVENT + 1
-pygame.time.set_timer(timer_event , timer_interval)
+pygame.time.set_timer(timer_event, timer_interval)
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 pygame.display.set_caption('FRUIT NINJA')
 start_screen()
 result = 0
+count_time = 5
+
+
 while True:
     for event in pygame.event.get():
         if event.type == timer_event:
-            print(3)
+            count_time -= 1
         if event.type == pygame.QUIT:
             terminate()
         if event.type == pygame.MOUSEBUTTONDOWN:
             all_sprites.update(event.pos)
             result += 5
             print(result)
+        if count_time == 0:
+            finish_screen()
+
     screen.fill(WHITE)
+
+    f1 = pygame.font.Font(None, 50)
+    text1 = f1.render(f'{count_time}', 1, BLACK)
+    screen.blit(text1, (750, 550))
+
     all_sprites.draw(screen)
     all_sprites.update()
     pygame.display.flip()
