@@ -2,13 +2,12 @@ import pygame
 import os
 import sys
 import random
-import time
 
 WHITE = pygame.Color("#ffffff")
 BLACK = pygame.Color("#000000")
 SIZE = WIDTH, HEIGHT = (800, 600)
 FPS = 80
-
+ls = [0]
 def terminate():
     pygame.quit()
     sys.exit()
@@ -51,21 +50,21 @@ def start_screen():
             elif event.type == pygame.KEYDOWN:
                 return
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if arr_rect[0].collidepoint(event.pos):
-                    light()
+                if arr_rect[2].collidepoint(event.pos):
+                    hard()
                 elif arr_rect[1].collidepoint(event.pos):
                     medium()
                 else:
-                    hard()
+                    light()
 
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)
 
 def finish_screen():
-    intro_text = [" Поздравляю!",
-                  "    Ты набрал", ""
-                  f"    {result} баллов"]
+    intro_text = ["Поздравляю!",
+                  "   Ты набрал", ""
+                  f"   {result} баллов"]
 
     fon = pygame.transform.scale(load_image('fon6.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
@@ -137,7 +136,8 @@ class Fruits(pygame.sprite.Sprite):
         if args:
             x, y = args[0]
             if self.rect.collidepoint(x, y):
-                self.rect.y = -50
+                ls[0]+=1
+                self.rect.y = -300
                 HalfFruit(self.fruit_type + "_left.png", 'left', x, y)
                 HalfFruit(self.fruit_type + "_right.png", 'right', x, y)
 
@@ -161,7 +161,6 @@ class Bomb(pygame.sprite.Sprite):
             self.rect.y = - self.rect.h
         if args:
             x, y = args[0]
-            #if flag: self.kill()
             if self.rect.collidepoint(x, y):
                 self.image = Bomb.image_boom
                 self.speed = random.randint(3, 5)
