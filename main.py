@@ -201,7 +201,7 @@ screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 pygame.display.set_caption('FRUIT NINJA')
 start_screen()
-count_time = 5
+count_time = 30
 
 
 while True:
