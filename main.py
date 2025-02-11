@@ -2,23 +2,28 @@ import pygame
 import os
 import sys
 import random
+from history import append_new_line
 
 WHITE = pygame.Color("#ffffff")
 BLACK = pygame.Color("#000000")
 SIZE = WIDTH, HEIGHT = (800, 600)
 FPS = 80
-ls = [0]
+results = [0]
+
+
 def terminate():
     pygame.quit()
     sys.exit()
 
-def load_image(name, colorkey=None):
+
+def load_image(name):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     image = pygame.image.load(fullname)
     return image
+
 
 def start_screen():
     intro_text = [" FRUIT NINJA",
@@ -57,20 +62,20 @@ def start_screen():
                 else:
                     light()
 
-                return  # начинаем игру
+                return
         pygame.display.flip()
         clock.tick(FPS)
+
 
 def finish_screen():
     intro_text = ["Поздравляю!",
                   "   Ты набрал", ""
-                  f"   {result} баллов"]
+                  f"   {results[0]} баллов"]
 
     fon = pygame.transform.scale(load_image('fon6.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 70)
     text_coord = 170
-    arr_rect = []
     for line in intro_text:
         string_rendered = font.render(line, 1, BLACK)
         intro_rect = string_rendered.get_rect()
@@ -79,29 +84,18 @@ def finish_screen():
         intro_rect.x = 250
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
-        arr_rect.append(intro_rect)
-
-    arr_rect = arr_rect[1:]
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN:
-                return
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if arr_rect[0].collidepoint(event.pos):
-                    light()
-                elif arr_rect[1].collidepoint(event.pos):
-                    medium()
-                else:
-                    hard()
 
-                return
         pygame.display.flip()
         clock.tick(FPS)
 
+
 tile_width = tile_height = 50
+
 
 class HalfFruit(pygame.sprite.Sprite):
     def __init__(self, fruit, side, pos_x, pos_y):
@@ -136,7 +130,7 @@ class Fruits(pygame.sprite.Sprite):
         if args:
             x, y = args[0]
             if self.rect.collidepoint(x, y):
-                ls[0]+=1
+                results[0] += 5
                 self.rect.y = -300
                 HalfFruit(self.fruit_type + "_left.png", 'left', x, y)
                 HalfFruit(self.fruit_type + "_right.png", 'right', x, y)
@@ -162,6 +156,7 @@ class Bomb(pygame.sprite.Sprite):
         if args:
             x, y = args[0]
             if self.rect.collidepoint(x, y):
+                results[0] -= 20
                 self.image = Bomb.image_boom
                 self.speed = random.randint(3, 5)
         if self.rect.y > 590:
@@ -175,10 +170,12 @@ bomb_group = pygame.sprite.Group()
 
 d = ('lemon', 'apple', 'pear', 'pineapple', 'watermelon')
 
+
 def light():
     for i in range(10):
         fruit_type = random.choice(d)
         Fruits(fruit_type, 5)
+
 
 def medium():
     for i in range(10):
@@ -187,6 +184,7 @@ def medium():
     for i in range(5):
         Bomb(5)
 
+
 def hard():
     for i in range(12):
         fruit_type = random.choice(d)
@@ -194,15 +192,15 @@ def hard():
     for i in range(10):
         Bomb(7)
 
+
 pygame.init()
-timer_interval = 1000 # 0.5 seconds
+timer_interval = 1000
 timer_event = pygame.USEREVENT + 1
 pygame.time.set_timer(timer_event, timer_interval)
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 pygame.display.set_caption('FRUIT NINJA')
 start_screen()
-result = 0
 count_time = 5
 
 
@@ -214,9 +212,8 @@ while True:
             terminate()
         if event.type == pygame.MOUSEBUTTONDOWN:
             all_sprites.update(event.pos)
-            result += 5
-            print(result)
         if count_time == 0:
+            append_new_line('results.txt', str(results[0]))
             finish_screen()
 
     screen.fill(WHITE)
@@ -229,3 +226,4 @@ while True:
     all_sprites.update()
     pygame.display.flip()
     clock.tick(FPS)
+
